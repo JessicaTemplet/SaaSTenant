@@ -1,0 +1,11 @@
+<h1>Set a new password</h1>
+
+<%= form_with url: password_path(token: params[:token]), method: :patch do |f| %>
+  <%= f.label :password, "New password" %>
+  <%= f.password_field :password %>
+
+  <%= f.label :password_confirmation %>
+  <%= f.password_field :password_confirmation %>
+
+  <%= f.submit "Update password" %>
+<% end %>

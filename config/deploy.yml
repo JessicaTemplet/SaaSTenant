@@ -1,0 +1,84 @@
+# Basic Kamal config — fill in the placeholders below before `bin/kamal deploy`.
+# Generated from `kamal init` (Kamal 2.12) and adapted for this app. Reference:
+# https://kamal-deploy.org/docs/configuration/
+
+service: saas-tenant
+
+# TODO: push to your own registry namespace (ghcr.io/<you>/saas-tenant works
+# well if you're already on GitHub Actions for CI).
+image: your-github-username/saas-tenant
+
+# TODO: your actual server IP(s). A single box is fine to start.
+servers:
+  web:
+    - 000.000.000.000
+
+# TODO: SSL/routing needs a real decision before this works for multi-tenant
+# subdomains, which is this app's whole routing model (config/routes.rb
+# resolves the tenant from request.subdomain — see establish_tenant_context
+# in ApplicationController). `host:` below is a single hostname; I could not
+# confirm from what's available locally whether kamal-proxy supports a
+# wildcard host pattern (e.g. "*.example.com") for automatic Let's Encrypt
+# wildcard certs, or whether it only issues per-host certs on demand as each
+# subdomain is first requested. Test this against a real deploy before
+# relying on it — the fallback if it doesn't Just Work is terminating SSL
+# yourself in front of Kamal (Cloudflare with a wildcard cert, or your own
+# Caddy/nginx on the host) and pointing kamal-proxy at plain HTTP.
+proxy:
+  ssl: true
+  host: example.com
+  # app_port: 80  # matches Dockerfile's EXPOSE 80 / bin/thrust default — uncomment if kamal-proxy doesn't detect it
+
+registry:
+  server: ghcr.io
+  username: your-github-username
+  password:
+    - KAMAL_REGISTRY_PASSWORD # a GitHub PAT with `write:packages` — set via .kamal/secrets
+
+builder:
+  arch: amd64 # match your server's arch — arm64 if deploying to e.g. Ampere/Graviton
+
+env:
+  clear:
+    DATABASE_HOST: saas-tenant-db # resolves to the db accessory below, on Kamal's private network
+    SAAS_TENANT_DATABASE_USERNAME: saas_tenant
+    RAILS_LOG_LEVEL: info
+  secret:
+    - RAILS_MASTER_KEY
+    - SECRET_KEY_BASE
+    - SAAS_TENANT_DATABASE_PASSWORD
+
+# solid_queue/cache/cable write to SQLite files under storage/ (see
+# config/database.yml) — these need to survive container restarts and
+# redeploys same as the Postgres data does.
+volumes:
+  - "saas_tenant_storage:/rails/storage"
+
+# One Postgres accessory container on the same host as `web`, for a
+# single-server start. Move `host:` to a dedicated DB server (and update
+# DATABASE_HOST above to match) once this needs to scale past one box —
+# see the README section on the app_runtime role: whichever host runs
+# Postgres, the app must connect as that restricted role, not as the
+# migration-running/table-owning role, or FORCE ROW LEVEL SECURITY on
+# users/documents/document_ops is silently a no-op.
+accessories:
+  db:
+    image: postgres:18
+    host: 000.000.000.000 # TODO: same as servers.web above for a single-box start
+    port: 5432
+    env:
+      clear:
+        POSTGRES_USER: saas_tenant
+        POSTGRES_DB: saas_tenant_production
+      secret:
+        - POSTGRES_PASSWORD # must match SAAS_TENANT_DATABASE_PASSWORD above
+    directories:
+      - data:/var/lib/postgresql/data
+
+# Bridge fingerprinted assets between the old and new version during a
+# deploy so in-flight requests referencing the previous digest don't 404.
+asset_path: /rails/public/assets
+
+boot:
+  limit: 1 # bump once you're running more than one web server
+  wait: 2

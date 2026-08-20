@@ -1,0 +1,50 @@
+# Quick start (not how this gets deployed for real - see config/deploy.yml /
+# Kamal for that):
+#
+#   cp .env.example .env   # fill in SECRET_KEY_BASE at minimum
+#   docker compose up --build
+#   open http://acme.localhost:3000   (any subdomain works; app/models/tenant.rb
+#                                       has no allowlist - tenants are created
+#                                       via the registration flow)
+#
+# Builds the same production Dockerfile Kamal deploys, against a local
+# Postgres - no Ruby/Postgres install needed on the host, just Docker.
+
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-saas_tenant}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: saas_tenant_production
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-saas_tenant}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    ports:
+      - "3000:80"
+    environment:
+      DATABASE_HOST: db
+      SAAS_TENANT_DATABASE_USERNAME: ${POSTGRES_USER:-saas_tenant}
+      SAAS_TENANT_DATABASE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:?Set SECRET_KEY_BASE in .env - generate one with `bin/rails secret`}
+      # Optional - only needed to decrypt config/credentials.yml.enc for real
+      # (e.g. LemonSqueezy webhook secret). App boots fine without it.
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:-}
+    volumes:
+      # solid_queue/cache/cable's SQLite files (see config/database.yml) need
+      # to persist across restarts same as the Postgres data does.
+      - app_storage:/rails/storage
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
+  app_storage:

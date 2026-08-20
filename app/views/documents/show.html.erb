@@ -1,0 +1,15 @@
+<h1><%= @document.title %></h1>
+
+<div data-controller="document-editor" data-document-editor-document-id-value="<%= @document.id %>">
+  <p>
+    Status:
+    <span data-document-editor-target="status">Connecting…</span>
+  </p>
+
+  <textarea
+    data-document-editor-target="textarea"
+    data-action="input->document-editor#onInput"
+    rows="20"
+    style="width: 100%; font-family: monospace;"
+  ></textarea>
+</div>

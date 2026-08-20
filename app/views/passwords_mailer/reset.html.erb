@@ -1,0 +1,11 @@
+<p>Hi,</p>
+
+<p>Reset your password for <%= @tenant.name %>:</p>
+
+<p>
+  <%= link_to "Reset password",
+        edit_password_url(token: @user.generate_token_for(:password_reset),
+                           host: "#{@tenant.subdomain}.example.com") %>
+</p>
+
+<p>This link expires in 15 minutes. If you didn't request this, ignore this email.</p>

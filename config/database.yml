@@ -1,0 +1,55 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  host: <%= ENV.fetch("DATABASE_HOST") { "localhost" } %>
+  username: <%= ENV.fetch("DATABASE_USERNAME") { "postgres" } %>
+  # Local dev/test default only — production below pulls from ENV with no
+  # local fallback, on purpose.
+  password: <%= ENV.fetch("DATABASE_PASSWORD") { "grapedesk" } %>
+
+development:
+  <<: *default
+  database: saas_tenant_development
+
+test:
+  <<: *default
+  database: saas_tenant_test
+
+# production sets config.eager_load = true (see config/environments/production.rb),
+# which loads every class up front at boot — including solid_queue/solid_cache/
+# solid_cable's own Record models, each of which does its own internal
+# `connects_to database: { writing: :queue/:cache/:cable }`. Without those three
+# roles defined below, boot fails immediately with
+# "ActiveRecord::AdapterNotSpecified: The `cable` database is not configured for
+# the `production` environment" — confirmed by actually booting in RAILS_ENV=production
+# locally, since development/test never eager-load and so never hit this path.
+# Satellite roles are SQLite (a plain file, no extra server to run) — that's the
+# Rails 8 default for these three regardless of what the primary database is,
+# since they're simple, high-churn, and shouldn't add load to the primary
+# Postgres database that Current-scoped app data (and RLS) lives in.
+production:
+  primary:
+    <<: *default
+    database: saas_tenant_production
+    # Deliberately ENV[] (nil-if-unset), not ENV.fetch with no default —
+    # database.yml is ERB-evaluated as ONE document before Rails picks out
+    # the active environment's section, so a raising .fetch here blows up
+    # db:create/db:migrate in development and test too, not just prod.
+    username: <%= ENV["SAAS_TENANT_DATABASE_USERNAME"] %>
+    password: <%= ENV["SAAS_TENANT_DATABASE_PASSWORD"] %>
+
+  cache:
+    adapter: sqlite3
+    database: storage/production_cache.sqlite3
+    migrations_paths: db/cache_migrate
+
+  queue:
+    adapter: sqlite3
+    database: storage/production_queue.sqlite3
+    migrations_paths: db/queue_migrate
+
+  cable:
+    adapter: sqlite3
+    database: storage/production_cable.sqlite3
+    migrations_paths: db/cable_migrate
