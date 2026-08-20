@@ -105,7 +105,7 @@ class DocumentChannel < ApplicationCable::Channel
 
   def apply_delete!(fugue, document, data)
     resolved_index = data["index"].to_i
-    [persist!(document, fugue.delete_at(resolved_index), resolved_index)]
+    [ persist!(document, fugue.delete_at(resolved_index), resolved_index) ]
   end
 
   def persist!(document, op, resolved_index)
@@ -125,11 +125,11 @@ class DocumentChannel < ApplicationCable::Channel
   def serialize(op, client_op_id: nil)
     payload = {
       type: op.op_type,
-      id: [op.fugue_replica, op.fugue_counter],
+      id: [ op.fugue_replica, op.fugue_counter ],
       value: op.value,
       index: op.resolved_index,
-      parent_id: op.parent_replica ? [op.parent_replica, op.parent_counter] : nil,
-      side: op.side,
+      parent_id: op.parent_replica ? [ op.parent_replica, op.parent_counter ] : nil,
+      side: op.side
     }
     payload[:client_op_id] = client_op_id if client_op_id
     payload

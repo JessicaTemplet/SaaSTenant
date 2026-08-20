@@ -12,6 +12,6 @@ class CreateUsers < ActiveRecord::Migration[8.0]
 
     # Email must be unique *within* a tenant, not globally — the same
     # person's email can exist under two different tenants (companies).
-    add_index :users, [:tenant_id, :email_address], unique: true
+    add_index :users, [ :tenant_id, :email_address ], unique: true
   end
 end

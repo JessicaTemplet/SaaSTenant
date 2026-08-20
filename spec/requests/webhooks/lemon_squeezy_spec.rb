@@ -18,7 +18,7 @@ RSpec.describe "LemonSqueezy webhooks", type: :request do
         "Content-Type" => "application/json",
         "X-Signature"  => signature,
         "X-Event-Name" => event_name,
-        "X-Event-Id"   => event_id,
+        "X-Event-Id"   => event_id
       }
   end
 

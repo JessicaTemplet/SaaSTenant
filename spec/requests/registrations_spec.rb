@@ -7,7 +7,7 @@ RSpec.describe "Registrations", type: :request do
 
   it "makes the first user for a tenant the owner" do
     post registration_path, params: {
-      user: { email_address: "first@example.test", password: "password123", password_confirmation: "password123" },
+      user: { email_address: "first@example.test", password: "password123", password_confirmation: "password123" }
     }
 
     Current.tenant = tenant
@@ -20,7 +20,7 @@ RSpec.describe "Registrations", type: :request do
     Current.tenant = nil
 
     post registration_path, params: {
-      user: { email_address: "second@example.test", password: "password123", password_confirmation: "password123" },
+      user: { email_address: "second@example.test", password: "password123", password_confirmation: "password123" }
     }
 
     Current.tenant = tenant
@@ -36,7 +36,7 @@ RSpec.describe "Registrations", type: :request do
     # `tenant` (acme) still has zero users even though `beta` already has
     # an owner — this registration should still become owner.
     post registration_path, params: {
-      user: { email_address: "first@example.test", password: "password123", password_confirmation: "password123" },
+      user: { email_address: "first@example.test", password: "password123", password_confirmation: "password123" }
     }
 
     Current.tenant = tenant

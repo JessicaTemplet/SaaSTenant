@@ -47,7 +47,7 @@ RSpec.describe FugueReplay do
 
     # Without restore_counter!, this would be ["server", 0] again â€” a
     # duplicate of the very first persisted op's id.
-    expect(new_op.id).to eq(["server", 2])
+    expect(new_op.id).to eq([ "server", 2 ])
     expect(rebuilt.to_s).to eq("abc")
   end
 

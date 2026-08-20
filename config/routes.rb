@@ -12,13 +12,13 @@ Rails.application.routes.draw do
   constraints(tenant_subdomain) do
     root to: "dashboard#index", as: :tenant_root
 
-    resource :session, only: [:new, :create, :destroy]
-    resource :registration, only: [:new, :create]
-    resource :password, only: [:new, :create, :edit, :update], controller: "passwords"
+    resource :session, only: [ :new, :create, :destroy ]
+    resource :registration, only: [ :new, :create ]
+    resource :password, only: [ :new, :create, :edit, :update ], controller: "passwords"
 
     get "dashboard", to: "dashboard#index"
 
-    resources :documents, only: [:show]
+    resources :documents, only: [ :show ]
   end
 
   # --- Webhooks (no subdomain / not tenant-scoped) ---

@@ -31,7 +31,7 @@ RSpec.describe Fugue do
     ops = [
       origin.insert_at(0, "a"),
       origin.insert_at(1, "b"),
-      origin.insert_at(2, "c"),
+      origin.insert_at(2, "c")
     ]
 
     replica_forward  = Fugue.new(replica_id: "r2")
@@ -54,7 +54,7 @@ RSpec.describe Fugue do
   it "does not interleave two concurrently-typed forward runs (the whole point of Fugue over RGA)" do
     # Shared baseline "ac" on both replicas.
     r1 = Fugue.new(replica_id: "r1")
-    shared_ops = [r1.insert_at(0, "a"), r1.insert_at(1, "c")]
+    shared_ops = [ r1.insert_at(0, "a"), r1.insert_at(1, "c") ]
 
     r2 = Fugue.new(replica_id: "r2")
     shared_ops.each { |op| r2.apply_op(op) }
@@ -64,11 +64,11 @@ RSpec.describe Fugue do
     # Concurrently, WITHOUT exchanging ops yet: r1 types "b" between a/c,
     # r2 independently types "x", "y", "z" (forward, one at a time) also
     # between a/c.
-    r1_ops = [r1.insert_at(1, "b")]
+    r1_ops = [ r1.insert_at(1, "b") ]
     r2_ops = [
       r2.insert_at(1, "x"),
       r2.insert_at(2, "y"),
-      r2.insert_at(3, "z"),
+      r2.insert_at(3, "z")
     ]
 
     expect(r1.to_s).to eq("abc")
@@ -105,7 +105,7 @@ RSpec.describe Fugue do
     op_b = b.insert_at(0, "B")
     op_c = c.insert_at(0, "C")
 
-    [op_a, op_b, op_c].each do |op|
+    [ op_a, op_b, op_c ].each do |op|
       a.apply_op(op) unless op == op_a
       b.apply_op(op) unless op == op_b
       c.apply_op(op) unless op == op_c
@@ -154,7 +154,7 @@ RSpec.describe Fugue do
       restored = Fugue.from_snapshot(doc.to_snapshot)
       new_op = restored.insert_at(2, "c")
 
-      expect(new_op.id).to eq(["r1", 2])
+      expect(new_op.id).to eq([ "r1", 2 ])
       expect(restored.to_s).to eq("abc")
     end
 
@@ -174,7 +174,7 @@ RSpec.describe Fugue do
       ops = [
         doc.insert_at(0, "a"),
         doc.insert_at(1, "b"),
-        doc.insert_at(2, "c"),
+        doc.insert_at(2, "c")
       ]
 
       from_scratch = Fugue.new(replica_id: "r1")

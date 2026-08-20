@@ -12,6 +12,6 @@ class CreateWebhookEvents < ActiveRecord::Migration[8.0]
 
     # The core of idempotent webhook handling: a given provider event
     # can only ever be recorded (and thus processed) once.
-    add_index :webhook_events, [:source, :external_id], unique: true
+    add_index :webhook_events, [ :source, :external_id ], unique: true
   end
 end

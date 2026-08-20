@@ -81,12 +81,12 @@ class Fugue
         # rightOrigin's LEFT child threads the new node in between
         # them. Fugue paper, Algorithm 1 lines 27-28 / Figure 4(b).
         right_origin = successor_including_tombstones(left_origin)
-        [right_origin.id, :left]
+        [ right_origin.id, :left ]
       else
         # leftOrigin has no right child yet â€” becoming its right child
         # directly makes the new node leftOrigin's immediate successor.
         # Algorithm 1 lines 25-26 / Figure 4(a).
-        [left_origin.id, :right]
+        [ left_origin.id, :right ]
       end
 
     op = InsertOp.new(type: :insert, id: id, value: value, parent_id: parent_id, side: side)
@@ -151,9 +151,9 @@ class Fugue
           "side" => n.side&.to_s,
           "tombstoned" => n.tombstoned,
           "left_children" => n.left_children,
-          "right_children" => n.right_children,
+          "right_children" => n.right_children
         }
-      end,
+      end
     }
   end
 
@@ -178,11 +178,11 @@ class Fugue
   def deserialize_id(raw)
     return nil if raw.nil?
 
-    [raw[0], raw[1]]
+    [ raw[0], raw[1] ]
   end
 
   def next_id
-    id = [replica_id, @counter]
+    id = [ replica_id, @counter ]
     @counter += 1
     id
   end

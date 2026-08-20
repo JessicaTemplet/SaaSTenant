@@ -69,13 +69,13 @@ class FugueReplay
     when "insert"
       Fugue::InsertOp.new(
         type: :insert,
-        id: [record.fugue_replica, record.fugue_counter],
+        id: [ record.fugue_replica, record.fugue_counter ],
         value: record.value,
-        parent_id: record.parent_replica ? [record.parent_replica, record.parent_counter] : nil,
+        parent_id: record.parent_replica ? [ record.parent_replica, record.parent_counter ] : nil,
         side: record.side&.to_sym,
       )
     when "delete"
-      Fugue::DeleteOp.new(type: :delete, id: [record.fugue_replica, record.fugue_counter])
+      Fugue::DeleteOp.new(type: :delete, id: [ record.fugue_replica, record.fugue_counter ])
     else
       raise ArgumentError, "unknown persisted op_type: #{record.op_type.inspect}"
     end

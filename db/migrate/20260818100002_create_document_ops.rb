@@ -24,8 +24,8 @@ class CreateDocumentOps < ActiveRecord::Migration[8.1]
     # it's tombstoning (that's how CRDT tombstoning works), so without
     # op_type here, persisting the delete after the insert would collide
     # with it instead of adding a second row.
-    add_index :document_ops, [:document_id, :fugue_replica, :fugue_counter, :op_type],
+    add_index :document_ops, [ :document_id, :fugue_replica, :fugue_counter, :op_type ],
               unique: true, name: "index_document_ops_on_document_and_fugue_id"
-    add_index :document_ops, [:document_id, :created_at]
+    add_index :document_ops, [ :document_id, :created_at ]
   end
 end
