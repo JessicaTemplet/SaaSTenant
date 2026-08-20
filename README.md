@@ -74,7 +74,17 @@ requirements for data isolation, or tenants large enough that noisy-neighbor
 query load becomes a real problem — schema-per-tenant (Apartment gem) or
 DB-per-tenant are the next steps, in that order.
 
-## Setup
+## Quick start (Docker, no local Ruby/Postgres needed)
+```bash
+cp .env.example .env   # fill in SECRET_KEY_BASE at minimum — bin/rails secret generates one
+docker compose up --build
+```
+Then visit `http://acme.localhost:3000` (any subdomain works — tenants are
+created via the registration flow, there's no allowlist). This builds and
+runs the same production `Dockerfile` Kamal deploys, against a local
+Postgres container — see `docker-compose.yml`.
+
+## Setup (native)
 ```bash
 bundle install
 bin/rails db:create db:migrate db:seed
@@ -119,15 +129,32 @@ bin/rails server
    to resolve the tenant — set `custom_data` when creating the LemonSqueezy
    checkout URL so it round-trips back to you on every webhook.
 
+## Deploying (Kamal)
+`config/deploy.yml` is a starting point, not a finished deploy — every
+`TODO` in it needs a real value (server IP, registry namespace, domain)
+before `bin/kamal deploy` will work. Two things worth reading in the file
+itself before you rely on it:
+- **Wildcard subdomain SSL is unverified.** This app resolves tenants from
+  `request.subdomain`, so it needs certs/routing for `*.yourdomain.com`,
+  not just one hostname — I could not confirm locally whether `kamal-proxy`
+  handles that out of the box. Test it against a real deploy first.
+- **The RLS `app_runtime` role setup above still applies** — whichever host
+  ends up running the `db` accessory, the app must connect as that
+  restricted role, or RLS silently protects nothing.
+
+Secrets (`RAILS_MASTER_KEY`, `SECRET_KEY_BASE`, DB password, registry
+password) are read from your shell environment via `.kamal/secrets` — see
+that file's comments. Nothing in `config/deploy.yml` or `.kamal/secrets` is
+a literal secret, so both are safe to commit as-is.
+
 ## Not included (next steps)
 - Invitations / multi-user-per-tenant admin UI (role field exists, no UI yet)
 - Rate limiting beyond the login endpoint
 - RLS policies on tables you add beyond `users` — copy the pattern in
   `db/migrate/*_enable_row_level_security_on_users.rb` for each new
   tenant-owned table; it is not inherited automatically
-- Tests — an RSpec + FactoryBot skeleton is in the Gemfile but no specs
-  are written yet; the highest-value first spec is one that asserts
-  `TenantScoped` actually raises/filters correctly.
+- A subscription/plan model — `Webhooks::LemonSqueezyController#process_event`
+  is still a stub (see the LemonSqueezy section above)
   `spec/support/current_attributes.rb` already resets `Current` after
   every example, so `Current.tenant` set in one spec won't leak into
   the next one (this doesn't happen automatically outside real requests).
