@@ -3,7 +3,7 @@ source "https://rubygems.org"
 ruby "4.0.6"
 
 gem "rails", "~> 8.1.0"
-gem "pg", "~> 1.5"
+gem "pg", "~> 1.7"
 gem "puma", ">= 5.0"
 gem "bcrypt", "~> 3.1.7"      # required by has_secure_password (Rails 8 native auth)
 
