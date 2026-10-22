@@ -16,7 +16,7 @@ gem "jbuilder"                # JSON view templates, for any API responses later
 gem "solid_cache"             # Rails 8 default cache store (DB-backed)
 gem "solid_queue"             # Rails 8 default job backend (DB-backed)
 gem "solid_cable"             # Rails 8 default Action Cable adapter (DB-backed, no Redis)
-gem "sqlite3", "~> 2.1"       # storage for the solid_cache/queue/cable satellite DBs (see database.yml) — primary stays on pg
+gem "sqlite3", "~> 2.10"      # storage for the solid_cache/queue/cable satellite DBs (see database.yml) — primary stays on pg
 
 gem "kamal", require: false   # deploy via `kamal deploy` — see config/deploy.yml
 gem "bootsnap", require: false
